@@ -5,7 +5,7 @@ package utils.dispatch
  * Date: 31/01/12
  */
 
-import dispatch._
+import dispatch.classic.{HandlerVerbs, Request}
 import play.api.libs.json._
 import play.api.libs.json.Json._
 

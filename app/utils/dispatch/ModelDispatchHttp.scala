@@ -5,7 +5,7 @@ package utils.dispatch
  * Date: 12/02/12
  */
 
-import dispatch._
+import dispatch.classic._
 import play.api.libs.json._
 import play.api.libs.json.Json._
 import models.Model
@@ -25,11 +25,11 @@ class ModelHandlers(subject: HandlerVerbs) {
   /**Process response as Model Instance in block */
   def >^>[M <: Model[_], T](block: (M) => T)(implicit fmt: Format[M], filter: (JsValue) => JsValue = (j: JsValue) => j) = new PlayJsonHandlers(subject) >! {
     (jsValue) =>
-      block(fromJson[M](filter(jsValue)))
+      block(fromJson[M](filter(jsValue)).get) //TODO getOrElse?
   }
 
   def >^*>[M <: Model[_], T](block: (Iterable[M]) => T)(implicit fmt: Format[M], filter: (JsValue) => Iterable[JsValue] = (j: JsValue) => Seq(j)) = new PlayJsonHandlers(subject) >! {
     (jsValue) =>
-      block(filter(jsValue).map(fromJson[M](_)))
+      block(filter(jsValue).map(fromJson[M](_).get)) //TODO getOrElse?
   }
 }

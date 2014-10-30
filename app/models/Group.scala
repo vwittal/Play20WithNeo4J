@@ -1,5 +1,6 @@
 package models
 
+import play.api.libs.functional.syntax._
 import utils.persistence.graph
 import play.api.libs.json._
 
@@ -22,19 +23,32 @@ case class Group(id: Int, name: String) extends Model[Group] {
 
 object Group {
 
-  implicit object GroupFormat extends Format[Group] {
-    def reads(json: JsValue): Group = Group(
-      (json \ "id").asOpt[Int].getOrElse(null.asInstanceOf[Int]),
-      (json \ "name").as[String]
-    )
+  val groupReads: Reads[Group] = (
+    (JsPath \ "id").read[Int].orElse( Reads.pure(null.asInstanceOf[Int]) ) and
+      (JsPath \ "name").read[String]
+    )(Group.apply _)
 
-    def writes(g: Group): JsValue = JsObject(List(
-      "_class_" -> JsString(Group.getClass.getName),
-      "name" -> JsString(g.name)
-    ) ::: (if (g.id != null.asInstanceOf[Int]) {
-      List("id" -> JsNumber(g.id))
-    } else {
-      Nil
-    }))
-  }
+  val groupWrites: Writes[Group] = (
+    (JsPath \ "id").write[Int] and
+      (JsPath \ "name").write[String]
+    )(unlift(Group.unapply))
+
+  implicit val groupFormat = Format(groupReads, groupWrites)
+
+
+//  implicit object GroupFormat extends Format[Group] {
+//    def reads(json: JsValue): Group = Group(
+//      (json \ "id").asOpt[Int].getOrElse(null.asInstanceOf[Int]),
+//      (json \ "name").as[String]
+//    )
+//
+//    def writes(g: Group): JsValue = JsObject(List(
+//      "_class_" -> JsString(Group.getClass.getName),
+//      "name" -> JsString(g.name)
+//    ) ::: (if (g.id != null.asInstanceOf[Int]) {
+//      List("id" -> JsNumber(g.id))
+//    } else {
+//      Nil
+//    }))
+//  }
 }

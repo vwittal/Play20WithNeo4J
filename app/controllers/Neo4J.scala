@@ -1,10 +1,10 @@
 package controllers
 
-import play.api.mvc._
-import play.api.data._
+import play.api._
+import play.api.libs.json.JsObject
 import play.api.libs.json._
-import play.api.libs.json.Json._
-import dispatch._
+import play.api.mvc._
+import dispatch.classic._
 import utils.dispatch.PlayJsonDispatchHttp._
 import utils.neo4j.Neo4JRestService
 
@@ -22,7 +22,8 @@ object Neo4J extends Controller {
 
   def node(id: Int) = Action {
     val node = Http(neo.neoRestNodeById(id) <:< Map("Accept" -> "application/json") >! {
-      jsValue => (jsValue \ "self").as[String]
+      jsValue => jsValue
+//      jsValue => (jsValue \ "self").as[String]
     })
     Ok(node)
   }
@@ -36,10 +37,10 @@ object Neo4J extends Controller {
   }
 
   def createNodeWithProperties = Action {
-    val props = toJson(Map("prop1" -> "value1", "prop2" -> "value2"))
+    val props = Json.toJson(Map("prop1" -> "value1", "prop2" -> "value2"))
 
     val (node, data: JsObject) = Http(
-      (neo.neoRestNode <<(stringify(props), "application/json"))
+      (neo.neoRestNode <<(Json.stringify(props), "application/json"))
         <:< Map("Accept" -> "application/json")
         >! {
         jsValue =>
@@ -75,7 +76,7 @@ object Neo4J extends Controller {
     ))
 
     val (rel, data: JsObject) = Http(
-      (url(create_relationship) <<(stringify(props), "application/json"))
+      (url(create_relationship) <<(Json.stringify(props), "application/json"))
         <:< Map("Accept" -> "application/json")
         >! {
         jsValue =>

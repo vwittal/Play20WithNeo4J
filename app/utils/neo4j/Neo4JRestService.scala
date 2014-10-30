@@ -8,7 +8,7 @@ package utils.neo4j
 import play.api.libs.json.Json._
 import play.api.libs.json._
 import models._
-import dispatch._
+import dispatch.classic._
 import utils.dispatch.PlayJsonDispatchHttp._
 import utils.dispatch.ModelDispatchHttp._
 import utils.persistence.GraphService
@@ -55,7 +55,10 @@ trait Neo4JRestService extends GraphService[Model[_]] {
   }
 
   override lazy val root: Model[_] = Http(neoRestBase <:< Map("Accept" -> "application/json") >! {
-    jsValue => new Model() { val id:Int = selfRestUriToId((jsValue \ "reference_node").as[String])}
+    jsValue => new Model() {
+      println(jsValue)
+      val id:Int = 189 //selfRestUriToId((jsValue \ "reference_node").as[String])
+    }
   })
 
 
@@ -64,7 +67,7 @@ trait Neo4JRestService extends GraphService[Model[_]] {
       Http(neoRestNodeById(id) <:< Map("Accept" -> "application/json") >^> (Some(_: T)))
     } catch {
       //todo check 404
-      case x => None
+      case x: Exception => None
     }
   }
 
